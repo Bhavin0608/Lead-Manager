@@ -1,4 +1,5 @@
 import LeadForm from './components/LeadForm'
+import EditForm from './components/EditForm'
 import { LeadsPage } from './pages/LeadsPage'
 import { BrowserRouter, Route, Routes, Link } from 'react-router-dom'
 
@@ -12,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LeadsPage />} />
         <Route path="/add-lead" element={<LeadForm />} />
+        <Route path="/edit-lead/:id" element={<EditForm />} />
       </Routes>
     </BrowserRouter>
   )

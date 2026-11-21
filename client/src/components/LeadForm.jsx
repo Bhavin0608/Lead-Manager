@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const LeadForm = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -28,13 +30,7 @@ const LeadForm = () => {
             })
             if(response.ok){
                 alert("Lead submitted successfully!");
-                setFormData({
-                    name: "",
-                    email: "",
-                    phone: "",
-                    company: "",
-                    source: "",
-                });
+                navigate("/");
             }
         }
         catch (error) {
