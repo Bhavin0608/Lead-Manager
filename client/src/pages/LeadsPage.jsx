@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 
 export const LeadsPage = () => {
     const [leads, setLeads] = useState([]);
+    const [searchTerm, setSearchTerm] = useState(null);
+    const [filteredLeads, setFilteredLeads] = useState([]);
 
     useEffect(() => {
         const featchLeads = async () => {
@@ -13,6 +15,7 @@ export const LeadsPage = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setLeads(data);
+                    setFilteredLeads(data);
                 } else {
                     console.error("Failed to fetch leads");
                 }
@@ -44,9 +47,39 @@ export const LeadsPage = () => {
         }
     };
 
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value);
+        const SearchedName = e.target.value.toLowerCase();
+        const FilteredLeads = SearchedName ? leads.filter((lead) => lead.name.toLowerCase().includes(SearchedName)) : leads;
+        setFilteredLeads(FilteredLeads);
+    }
+
+    const handleStatusChange = (e) => {
+        const selectedStatus = e.target.value;
+        const FilteredLeads = selectedStatus ? leads.filter((lead) => lead.status === selectedStatus) : leads;
+        setFilteredLeads(FilteredLeads);
+    }
+
     return (
         <div align="center">
-            <h1>All Leads</h1>
+            <h1>Leads</h1>
+
+            <input
+                type="text"
+                placeholder="Search by name"
+                value={searchTerm}
+                onChange={handleSearch}
+            />
+
+            <select onChange={handleStatusChange}>
+                <option value="">Select Status</option>
+                <option value="New">New</option>
+                <option value="Contacted">Contacted</option>
+                <option value="Qualified">Qualified</option>
+                <option value="Lost">Lost</option>
+            </select>
+            <br /><br />
+
             <table border="1" cellPadding="5" cellSpacing="0">
                 <thead>
                     <tr>
@@ -60,7 +93,7 @@ export const LeadsPage = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {leads.map((lead) => (
+                    {filteredLeads.map((lead) => (
                         <tr key={lead._id}>
                             <td>{lead.name}</td>
                             <td>{lead.email}</td>
