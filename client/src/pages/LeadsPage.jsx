@@ -24,6 +24,26 @@ export const LeadsPage = () => {
         featchLeads();
     }, []);
 
+    const handleDelete = async (id) => {
+        try {
+            // Show a confirmation dialog
+            if (!window.confirm("Are you sure you want to delete this lead?")) {
+                return;
+            }
+            const response = await fetch(`/api/leads/${id}`, {
+                method: "DELETE",
+            });
+            if (response.ok) {
+                setLeads(leads.filter((lead) => lead._id !== id));
+            } else {
+                console.error("Failed to delete lead");
+            }
+        }
+        catch (error) {
+            console.error("Error deleting lead:", error);
+        }
+    };
+
     return (
         <div align="center">
             <h1>All Leads</h1>
@@ -49,7 +69,8 @@ export const LeadsPage = () => {
                             <td>{lead.source}</td>
                             <td>{lead.status}</td>
                             <td>
-                                <Link to={`/edit-lead/${lead._id}`}>Edit</Link>
+                                <button onClick={() => handleDelete(lead._id)}>Delete</button>
+                                <button><Link to={`/edit-lead/${lead._id}`}>Edit</Link></button>
                             </td>
                         </tr>
                     ))}
