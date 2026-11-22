@@ -3,50 +3,45 @@ import { Link } from 'react-router-dom'
 
 export const LeadsPage = () => {
     const [leads, setLeads] = useState([]);
-    const [searchTerm, setSearchTerm] = useState(null);
-    const [filteredLeads, setFilteredLeads] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedStatus, setSelectedStatus] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    const query = searchTerm.trim().toLowerCase();
+
+    const filteredLeads = leads.filter((lead) => {
+        const matchesName = lead.name.toLowerCase().includes(query);
+        const matchesStatus = !selectedStatus || lead.status === selectedStatus;
+        return matchesName && matchesStatus;
+    });
 
     useEffect(() => {
-        const featchLeads = async () => {
+        async function fetchLeads() {
             try {
-                const response = await fetch("/api/leads", {
-                    method: "GET",
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setLeads(data);
-                    setFilteredLeads(data);
-                } else {
-                    console.error("Failed to fetch leads");
-                }
-            }
-            catch (error) {
-                console.error("Error fetching leads:", error);
+                const response = await fetch("/api/leads");
+                if (!response.ok) throw new Error("Couldn’t load leads.");
+                    setLeads(await response.json());
+                } catch {
+                    setError("Couldn’t load leads. Refresh the page to try again.");
+                } finally {
+                    setLoading(false);
             }
         }
-        featchLeads();
+        fetchLeads();
     }, []);
 
-    const handleDelete = async (id) => {
+    async function handleDelete(lead) {
+        if (!window.confirm(`Delete ${lead.name}?`)) return;
+        setError("");
         try {
-            // Show a confirmation dialog
-            if (!window.confirm("Are you sure you want to delete this lead?")) {
-                return;
-            }
-            const response = await fetch(`/api/leads/${id}`, {
-                method: "DELETE",
-            });
-            if (response.ok) {
-                setLeads(leads.filter((lead) => lead._id !== id));
-                setFilteredLeads(filteredLeads.filter((lead) => lead._id !== id));
-            } else {
-                console.error("Failed to delete lead");
-            }
+            const response = await fetch(`/api/leads/${lead._id}`, { method: "DELETE" });
+            if (!response.ok) throw new Error("Delete failed.");
+            setLeads((current) => current.filter((item) => item._id !== lead._id));
+        } catch {
+            setError(`Couldn’t delete ${lead.name}. Please try again.`);
         }
-        catch (error) {
-            console.error("Error deleting lead:", error);
-        }
-    };
+    }
 
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
@@ -62,54 +57,77 @@ export const LeadsPage = () => {
     }
 
     return (
-        <div align="center">
-            <h1>Leads</h1>
+        <section className="lead-card" aria-labelledby="leads-title">
+            <header className="lead-heading">
+            <h1 id="leads-title">All leads</h1>
+            <Link className="lead-button lead-primary" to="/add-lead">+ Add lead</Link>
+            </header>
 
-            <input
-                type="text"
-                placeholder="Search by name"
+            <div className="lead-toolbar">
+            <label>
+                Search by name
+                <input
+                type="search"
+                placeholder="e.g. Riya Shah"
                 value={searchTerm}
-                onChange={handleSearch}
-            />
+                onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </label>
 
-            <select onChange={handleStatusChange}>
-                <option value="">Select Status</option>
-                <option value="New">New</option>
-                <option value="Contacted">Contacted</option>
-                <option value="Qualified">Qualified</option>
-                <option value="Lost">Lost</option>
-            </select>
-            <br /><br />
+            <label>
+                Status
+                <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
+                <option value="">All statuses</option>
+                {["New", "Contacted", "Qualified", "Lost"].map((status) => (
+                    <option key={status} value={status}>{status}</option>
+                ))}
+                </select>
+            </label>
+            </div>
 
-            <table border="1" cellPadding="5" cellSpacing="0">
+            {error && <p className="lead-error" role="alert">{error}</p>}
+
+            {loading ? (
+            <p role="status">Loading leads…</p>
+            ) : filteredLeads.length > 0 ? (
+            <div className="lead-table-scroll" role="region" aria-label="Leads table" tabIndex={0}>
+                <table className="lead-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Company</th>
-                        <th>Source</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                    {["Name", "Email", "Phone", "Company", "Source", "Status", "Actions"].map((heading) => (
+                        <th key={heading} scope="col">{heading}</th>
+                    ))}
                     </tr>
                 </thead>
                 <tbody>
                     {filteredLeads.map((lead) => (
-                        <tr key={lead._id}>
-                            <td>{lead.name}</td>
-                            <td>{lead.email}</td>
-                            <td>{lead.phone}</td>
-                            <td>{lead.company}</td>
-                            <td>{lead.source}</td>
-                            <td>{lead.status}</td>
-                            <td>
-                                <button onClick={() => handleDelete(lead._id)}>Delete</button>
-                                <button><Link to={`/edit-lead/${lead._id}`}>Edit</Link></button>
-                            </td>
-                        </tr>
+                    <tr key={lead._id}>
+                        <th scope="row">{lead.name}</th>
+                        <td>{lead.email}</td>
+                        <td>{lead.phone}</td>
+                        <td>{lead.company}</td>
+                        <td>{lead.source}</td>
+                        <td>
+                        <span className="lead-status" data-status={lead.status}>
+                            {lead.status}
+                        </span>
+                        </td>
+                        <td>
+                        <div className="lead-row-actions">
+                            <Link to={`/edit-lead/${lead._id}`}>Edit</Link>
+                            <button type="button" onClick={() => handleDelete(lead)}>Delete</button>
+                        </div>
+                        </td>
+                    </tr>
                     ))}
                 </tbody>
-            </table>
-        </div>
-    )
+                </table>
+            </div>
+            ) : !error && (
+            <p className="lead-empty">
+                {leads.length ? "No leads match these filters." : "No leads yet. Add your first lead to get started."}
+            </p>
+            )}
+        </section>
+    );
 }

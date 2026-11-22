@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 const EditForm = () => {
     const { id } = useParams();
@@ -61,28 +61,58 @@ const EditForm = () => {
     }
 
     return (
-        <form onSubmit={handleSubmit} align="center">
-            <input type = "text" name = "name" placeholder = "Name" value = {formData.name} onChange = {handleChange} required /><br />
-            <input type = "email" name = "email" placeholder = "Email" value = {formData.email} onChange = {handleChange} required /><br />
-            <input type = "text" name = "phone" placeholder = "Phone" value = {formData.phone} onChange = {handleChange} required /><br />
-            <input type = "text" name = "company" placeholder = "Company" value = {formData.company} onChange = {handleChange} required /><br />
-            <select name = "source" value = {formData.source} onChange = {handleChange} required>
-                <option value="">Select Source</option>
-                <option value="Website">Website</option>
-                <option value="Referral">Referral</option>
-                <option value="Social Media">Social Media</option>
-                <option value="Other">Other</option>
-            </select><br />
-            <select name = "status" value = {formData.status} onChange = {handleChange} required>
-                <option value="">Select Status</option>
-                <option value="New">New</option>
-                <option value="Contacted">Contacted</option>
-                <option value="Qualified">Qualified</option>
-                <option value="Lost">Lost</option>
-            </select><br />
-            <button type = "submit">Update Lead</button>
-        </form>
-    )
+        <section className="lead-card edit-card" aria-labelledby="edit-title">
+            <Link className="lead-back" to="/view-leads">← All leads</Link>
+            <h1 id="edit-title">Edit lead</h1>
+
+            <form className="lead-form" onSubmit={handleSubmit}>
+            <label>
+                Name
+                <input name="name" value={formData.name} onChange={handleChange} required />
+            </label>
+
+            <label>
+                Company
+                <input name="company" value={formData.company} onChange={handleChange} required />
+            </label>
+
+            <label>
+                Email
+                <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+            </label>
+
+            <label>
+                Phone
+                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
+            </label>
+
+            <label>
+                Source
+                <select name="source" value={formData.source} onChange={handleChange} required>
+                <option value="">Select source</option>
+                {["Website", "Referral", "Social Media", "Other"].map((source) => (
+                    <option key={source} value={source}>{source}</option>
+                ))}
+                </select>
+            </label>
+
+            <label>
+                Status
+                <select name="status" value={formData.status} onChange={handleChange} required>
+                <option value="">Select status</option>
+                {["New", "Contacted", "Qualified", "Lost"].map((status) => (
+                    <option key={status} value={status}>{status}</option>
+                ))}
+                </select>
+            </label>
+
+            <div className="lead-form-actions">
+                <Link className="lead-button" to="/view-leads">Cancel</Link>
+                <button className="lead-button lead-primary" type="submit">Save changes</button>
+            </div>
+            </form>
+        </section>
+        );
 }
 
 export default EditForm;
