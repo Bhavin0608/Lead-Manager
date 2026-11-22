@@ -30,7 +30,7 @@ const LeadForm = () => {
             })
             if(response.ok){
                 alert("Lead submitted successfully!");
-                navigate("/");
+                navigate("/view-leads");
             }
         }
         catch (error) {

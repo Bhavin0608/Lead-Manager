@@ -38,6 +38,7 @@ export const LeadsPage = () => {
             });
             if (response.ok) {
                 setLeads(leads.filter((lead) => lead._id !== id));
+                setFilteredLeads(filteredLeads.filter((lead) => lead._id !== id));
             } else {
                 console.error("Failed to delete lead");
             }

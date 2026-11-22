@@ -53,7 +53,7 @@ const EditForm = () => {
             }
             else {
                 alert('Lead updated successfully!');
-                navigate('/');
+                navigate('/view-leads');
             }
         } catch (error) {
             console.error('Error updating lead:', error);
