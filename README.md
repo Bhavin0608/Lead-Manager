@@ -16,8 +16,7 @@ npm install
 Create a file named `.env` inside `server/`. For a local MongoDB instance, use:
 
 ```dotenv
-MONGODB_URI=mongodb://127.0.0.1:27017/lead_manager
-PORT=5000
+MONGO_URI = 'mongodb://localhost:27017/lead_manager'
 ```
 
 For Atlas, use your database connection string as the value of `MONGODB_URI`. Keep credentials in your local environment and exclude `.env` from Git. Start the API from the same terminal:
